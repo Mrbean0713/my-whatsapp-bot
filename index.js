@@ -5,7 +5,8 @@ async function startBot() {
 
     const sock = makeWASocket({
         auth: state,
-        printQRInTerminal: false
+        printQRInTerminal: true,
+        browser: ["Chrome", "Desktop", "22.04"]
     });
 
     sock.ev.on("creds.update", saveCreds);
@@ -13,19 +14,21 @@ async function startBot() {
     sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect } = update;
 
+        if (connection === "open") {
+            console.log("✅ Bot connecté WhatsApp");
+        }
+
         if (connection === "close") {
             const code = lastDisconnect?.error?.output?.statusCode;
 
-            if (code !== DisconnectReason.loggedOut) {
-                console.log("🔁 Reconnexion...");
-                startBot();
-            } else {
-                console.log("❌ Déconnecté");
-            }
-        }
+            console.log("Connexion fermée:", code);
 
-        if (connection === "open") {
-            console.log("✅ Bot connecté WhatsApp");
+            if (code !== DisconnectReason.loggedOut) {
+                console.log("🔁 Reconnexion dans 5 secondes...");
+                setTimeout(startBot, 5000);
+            } else {
+                console.log("❌ Déconnecté définitivement");
+            }
         }
     });
 
@@ -33,7 +36,10 @@ async function startBot() {
         const msg = messages[0];
         if (!msg.message) return;
 
-        const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
+        const text =
+            msg.message.conversation ||
+            msg.message.extendedTextMessage?.text;
+
         const jid = msg.key.remoteJid;
 
         if (text === ".menu") {
