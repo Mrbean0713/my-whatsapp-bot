@@ -1,12 +1,3 @@
-const express = require("express");
-const app = express();
-
-app.get("/", (req, res) => {
-    res.send("Bot WhatsApp actif");
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Serveur sur port " + PORT));
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
 
 async function startBot() {
@@ -46,15 +37,11 @@ async function startBot() {
         const jid = msg.key.remoteJid;
 
         if (text === ".menu") {
-            await sock.sendMessage(jid, {
-                text: "🤖 MENU\n.menu\n.alive"
-            });
+            await sock.sendMessage(jid, { text: "🤖 MENU\n.menu\n.alive" });
         }
 
         if (text === ".alive") {
-            await sock.sendMessage(jid, {
-                text: "✅ Bot OK"
-            });
+            await sock.sendMessage(jid, { text: "✅ Bot OK" });
         }
     });
 
@@ -62,15 +49,3 @@ async function startBot() {
 }
 
 startBot();
-
-const express = require("express");
-const app = express();
-
-app.get("/", (req, res) => {
-    res.send("Bot WhatsApp actif");
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log("Serveur lancé sur le port " + PORT);
-});
