@@ -65,3 +65,14 @@ async function startBot() {
 }
 
 startBot();
+if (connection === "close") {
+    const code = lastDisconnect?.error?.output?.statusCode;
+
+    console.log("Connection closed:", code);
+
+    if (code !== DisconnectReason.loggedOut) {
+        setTimeout(() => startBot(), 5000);
+    } else {
+        console.log("Logged out définitivement");
+    }
+}
