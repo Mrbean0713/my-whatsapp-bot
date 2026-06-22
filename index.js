@@ -19,8 +19,7 @@ async function startBot() {
     sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect } = update;
 
-        if (connection === "close") {
-            const code = lastDisconnect?.error?.output?.statusCode;
+    const code = lastDisconnect?.error?.output?.statusCode;
 
             console.log("Connexion fermée:", code);
 
