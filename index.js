@@ -1,3 +1,12 @@
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("Bot WhatsApp actif");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Serveur sur port " + PORT));
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
 
 async function startBot() {
