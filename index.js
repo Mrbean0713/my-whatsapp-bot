@@ -1,18 +1,17 @@
 const http = require("http");
-
-http.createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("Bot is alive");
-}).listen(process.env.PORT || 3000);
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
+
+// 🔧 IMPORTANT Render (garde le bot vivant)
+http.createServer((req, res) => {
+    res.end("Bot OK");
+}).listen(process.env.PORT || 3000);
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState("session");
 
     const sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true,
-        browser: ["Chrome", "Desktop", "22.04"]
+        printQRInTerminal: false
     });
 
     sock.ev.on("creds.update", saveCreds);
@@ -20,21 +19,21 @@ async function startBot() {
     sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect } = update;
 
-        if (connection === "open") {
-            console.log("✅ Bot connecté WhatsApp");
-        }
-
         if (connection === "close") {
             const code = lastDisconnect?.error?.output?.statusCode;
 
             console.log("Connexion fermée:", code);
 
             if (code !== DisconnectReason.loggedOut) {
-                console.log("🔁 Reconnexion dans 5 secondes...");
-                setTimeout(startBot, 5000);
+                console.log("🔁 Reconnexion...");
+                setTimeout(() => startBot(), 5000);
             } else {
                 console.log("❌ Déconnecté définitivement");
             }
+        }
+
+        if (connection === "open") {
+            console.log("✅ Bot connecté WhatsApp");
         }
     });
 
@@ -42,10 +41,7 @@ async function startBot() {
         const msg = messages[0];
         if (!msg.message) return;
 
-        const text =
-            msg.message.conversation ||
-            msg.message.extendedTextMessage?.text;
-
+        const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
         const jid = msg.key.remoteJid;
 
         if (text === ".menu") {
@@ -65,14 +61,3 @@ async function startBot() {
 }
 
 startBot();
-if (connection === "close") {
-    const code = lastDisconnect?.error?.output?.statusCode;
-
-    console.log("Connection closed:", code);
-
-    if (code !== DisconnectReason.loggedOut) {
-        setTimeout(() => startBot(), 5000);
-    } else {
-        console.log("Logged out définitivement");
-    }
-}
