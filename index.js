@@ -1,7 +1,7 @@
 const http = require("http");
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
 
-// 🔧 IMPORTANT Render (garde le bot vivant)
+// Render = port obligatoire
 http.createServer((req, res) => {
     res.end("Bot OK");
 }).listen(process.env.PORT || 3000);
@@ -19,20 +19,20 @@ async function startBot() {
     sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect } = update;
 
-    const code = lastDisconnect?.error?.output?.statusCode;
+        if (connection === "close") {
+            const code = lastDisconnect?.error?.output?.statusCode;
 
             console.log("Connexion fermée:", code);
 
             if (code !== DisconnectReason.loggedOut) {
-                console.log("🔁 Reconnexion...");
                 setTimeout(() => startBot(), 5000);
             } else {
-                console.log("❌ Déconnecté définitivement");
+                console.log("Déconnecté");
             }
         }
 
         if (connection === "open") {
-            console.log("✅ Bot connecté WhatsApp");
+            console.log("Bot connecté WhatsApp");
         }
     });
 
@@ -40,7 +40,10 @@ async function startBot() {
         const msg = messages[0];
         if (!msg.message) return;
 
-        const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
+        const text =
+            msg.message.conversation ||
+            msg.message.extendedTextMessage?.text;
+
         const jid = msg.key.remoteJid;
 
         if (text === ".menu") {
